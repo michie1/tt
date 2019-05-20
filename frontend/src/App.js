@@ -10,10 +10,18 @@ function TimerButton(props) {
 }
 
 function Timer(props) {
-  if (props.started) {
-    return <h2>{props.time}</h2>
+  const hours = prependZero(Math.floor(props.time / 60 / 60));
+  const minutes = prependZero(Math.floor(props.time / 60 % 60));
+  const seconds = prependZero(props.time % 60);
+
+  return <span>{hours}:{minutes}:{seconds}</span>;
+}
+
+function prependZero(number) {
+  if (number < 10) {
+    return '0' + number;
   } else {
-    return <h2>00:00:00</h2>
+    return number;
   }
 }
 
@@ -27,10 +35,37 @@ function timeReducer(state, action) {
   }
 }
 
+
+function Entry(props) {
+  return <li><Timer time={props.entry.time} /> - {props.entry.text}</li>;
+}
+
+function Entries(props) {
+  return <div>
+      <h2>Entries</h2>
+      <ul>
+        {props.entries.map((entry) => { return <Entry key={entry.text} entry={entry} />; })}
+      </ul>
+    </div>;
+}
+
 function App() {
-  const [text, setText] = React.useState('hoi');
+  const [text, setText] = React.useState('');
   const [timerStarted, setStarted] = React.useState(false);
   const [time, timeDispatch] = React.useReducer(timeReducer, 0);
+
+  const [entries, entriesDispatch] = React.useReducer(entriesReducer, []);
+
+  function entriesReducer(state, action) {
+    if (action.type === 'add') {
+      return [...state, {
+        time,
+        text
+      }];
+    } else {
+      return state;
+    }
+  }
 
   React.useEffect(() => {
     if (timerStarted) {
@@ -41,23 +76,19 @@ function App() {
       }, 1000);
       return () => {
         clearInterval(id);
-        timeDispatch({
-          type: 'reset'
+        entriesDispatch({
+          type: 'add',
         });
       }
     }
   }, [timerStarted]);
 
-  function stop() {
-    console.log('stop', text);
-    setStarted(false);
-  }
-
   return (
     <div>
-      <Timer started={timerStarted} time={time} />
-      <input name="timer_text" value={text} onChange={(e) => setText(e.target.value)} />
-      <TimerButton started={timerStarted} start={() => setStarted(true)} stop={stop}/>
+      <h2><Timer started={timerStarted} time={time} /></h2>
+      <input name="timer_text" value={text} placeholder="task" onChange={(e) => setText(e.target.value)} />
+      <TimerButton started={timerStarted} start={() => setStarted(true)} stop={() => { setStarted(false); }}/>
+      <Entries entries={entries} dispatch={entriesDispatch} />
     </div>
   );
 }
