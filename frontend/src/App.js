@@ -25,17 +25,6 @@ function prependZero(number) {
   }
 }
 
-function timeReducer(state, action) {
-  if (action.type === 'tick') {
-    return state + 1;
-  } else if (action.type === 'reset') {
-    return 0;
-  } else {
-    return state;
-  }
-}
-
-
 function Entry(props) {
   return <li><Timer time={props.entry.time} /> - {props.entry.text}</li>;
 }
@@ -51,46 +40,63 @@ function Entries(props) {
 
 function App() {
   const [text, setText] = React.useState('');
-  const [timerStarted, setStarted] = React.useState(false);
-  const [time, timeDispatch] = React.useReducer(timeReducer, 0);
 
-  const [entries, entriesDispatch] = React.useReducer(entriesReducer, []);
+  const [{
+    entries,
+    time,
+    started
+  }, dispatch] = React.useReducer(reducer, {
+    entries: [],
+    time: 0,
+    started: false,
+  });
 
-  function entriesReducer(state, action) {
+  function reducer(state, action) {
     if (action.type === 'add') {
-      return [...state, {
-        time,
-        text
-      }];
-    } else {
-      return state;
+      return {
+        entries: [...state.entries, {
+          time: state.time,
+          text: text,
+        }],
+        time: 0,
+        started: false,
+      };
+    } else if (action.type === 'start') {
+      return {
+        ...state,
+        started: true
+      };
+    } else if (action.type === 'tick') {
+      return {
+        ...state,
+        time: state.time + 1,
+      };
     }
+
+    return state;
   }
 
   React.useEffect(() => {
-    if (timerStarted) {
+    if (started) {
       const id = setInterval(() => {
-        timeDispatch({
+        dispatch({
           type: 'tick'
         });
       }, 1000);
       return () => {
         clearInterval(id);
-        entriesDispatch({
-          type: 'add',
-        });
       }
     }
-  }, [timerStarted]);
+  }, [started]);
+
 
   return (
     <div>
-      <h2><Timer started={timerStarted} time={time} /></h2>
+      <h2><Timer started={started} time={time} /></h2>
       <input name="timer_text" value={text} placeholder="task" onChange={(e) => setText(e.target.value)} />
-      <TimerButton started={timerStarted} start={() => setStarted(true)} stop={() => { setStarted(false); }}/>
-      <Entries entries={entries} dispatch={entriesDispatch} />
+      <TimerButton started={started} start={() => dispatch({ type: 'start' })} stop={() => { dispatch({ type: 'add' })}} />
+      <Entries entries={entries} />
     </div>
   );
 }
-
 export default App;
