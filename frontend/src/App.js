@@ -26,14 +26,29 @@ function prependZero(number) {
 }
 
 function Entry(props) {
-  return <li><Timer time={props.entry.time} /> - {props.entry.text}</li>;
+  console.log({props});
+  return <li>
+      <Timer time={props.entry.time} /> - {props.entry.text}
+      <button onClick={() => { props.continue(); }}>Continue</button>
+    </li>;
 }
 
 function Entries(props) {
   return <div>
       <h2>Entries</h2>
       <ul>
-        {props.entries.map((entry) => { return <Entry key={entry.text} entry={entry} />; })}
+        {props.entries.map((entry) => {
+          return <Entry
+              key={entry.text}
+              entry={entry}
+              continue={() => {
+                props.dispatch({
+                  type: 'continue',
+                  payload: entry.text,
+                });
+              }}
+            />;
+        })}
       </ul>
     </div>;
 }
@@ -53,6 +68,21 @@ function reducer(state, action) {
     return {
       ...state,
       started: true,
+    };
+  } else if (action.type === 'continue') {
+    const entry = state.entries
+      .find((searchEntry) => {
+        return searchEntry.text === action.payload;
+      });
+
+    return {
+      ...state,
+      started: true,
+      entries: state.entries.filter((entry) => {
+        return entry.text !== action.payload;
+      }),
+      time: entry.time,
+      text: entry.text,
     };
   } else if (action.type === 'tick') {
     return {
@@ -99,8 +129,12 @@ function App() {
     <div>
       <h2><Timer started={started} time={time} /></h2>
       <input name="timer_text" value={text} placeholder="task" onChange={(e) => dispatch({ type: 'setText', payload: e.target.value })} />
-      <TimerButton started={started} start={() => dispatch({ type: 'start' })} stop={() => { dispatch({ type: 'add' })}} />
-      <Entries entries={entries} />
+      <TimerButton
+        started={started}
+        start={() => dispatch({ type: 'start' })}
+        stop={() => { dispatch({ type: 'add' })}}
+      />
+      <Entries entries={entries} dispatch={dispatch} />
     </div>
   );
 }
