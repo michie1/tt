@@ -38,43 +38,49 @@ function Entries(props) {
     </div>;
 }
 
-function App() {
-  const [text, setText] = React.useState('');
+function reducer(state, action) {
+  if (action.type === 'add') {
+    return {
+      entries: [...state.entries, {
+        time: state.time,
+        text: state.text,
+      }],
+      time: 0,
+      started: false,
+      text: '',
+    };
+  } else if (action.type === 'start') {
+    return {
+      ...state,
+      started: true,
+    };
+  } else if (action.type === 'tick') {
+    return {
+      ...state,
+      time: state.time + 1,
+    };
+  } else if (action.type === 'setText') {
+    return {
+      ...state,
+      text: action.payload,
+    };
+  }
 
+  return state;
+}
+
+function App() {
   const [{
     entries,
     time,
-    started
+    started,
+    text,
   }, dispatch] = React.useReducer(reducer, {
     entries: [],
     time: 0,
     started: false,
+    text: ''
   });
-
-  function reducer(state, action) {
-    if (action.type === 'add') {
-      return {
-        entries: [...state.entries, {
-          time: state.time,
-          text: text,
-        }],
-        time: 0,
-        started: false,
-      };
-    } else if (action.type === 'start') {
-      return {
-        ...state,
-        started: true
-      };
-    } else if (action.type === 'tick') {
-      return {
-        ...state,
-        time: state.time + 1,
-      };
-    }
-
-    return state;
-  }
 
   React.useEffect(() => {
     if (started) {
@@ -89,11 +95,10 @@ function App() {
     }
   }, [started]);
 
-
   return (
     <div>
       <h2><Timer started={started} time={time} /></h2>
-      <input name="timer_text" value={text} placeholder="task" onChange={(e) => setText(e.target.value)} />
+      <input name="timer_text" value={text} placeholder="task" onChange={(e) => dispatch({ type: 'setText', payload: e.target.value })} />
       <TimerButton started={started} start={() => dispatch({ type: 'start' })} stop={() => { dispatch({ type: 'add' })}} />
       <Entries entries={entries} />
     </div>
