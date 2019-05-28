@@ -26,7 +26,6 @@ function prependZero(number) {
 }
 
 function Entry(props) {
-  console.log({props});
   return <li>
       <Timer time={props.entry.time} /> - {props.entry.text}
       <button onClick={() => { props.continue(); }}>Continue</button>
@@ -125,6 +124,10 @@ function App() {
     }
   }, [started]);
 
+  const sum = entries.reduce((soFar, entry) => {
+    return soFar + entry.time;
+  }, time);
+
   return (
     <div>
       <h2><Timer started={started} time={time} /></h2>
@@ -135,6 +138,8 @@ function App() {
         stop={() => { dispatch({ type: 'add' })}}
       />
       <Entries entries={entries} dispatch={dispatch} />
+      <br />
+      Total time: <Timer time={sum} />
     </div>
   );
 }
