@@ -130,7 +130,7 @@ function App() {
 
   return (
     <div>
-      <h2><Timer started={started} time={time} /></h2>
+      <h2><Timer time={time} /></h2>
       <input name="timer_text" value={text} placeholder="task" onChange={(e) => dispatch({ type: 'setText', payload: e.target.value })} />
       <TimerButton
         started={started}
