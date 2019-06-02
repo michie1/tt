@@ -1,7 +1,7 @@
 import React from 'react';
 import ApolloClient from "apollo-boost";
 import { gql } from "apollo-boost";
-import { uuid } from  'uuid/v4';
+import * as uuid from  'uuid/v4';
 import './App.css';
 
 const client = new ApolloClient({
