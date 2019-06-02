@@ -1,5 +1,12 @@
 import React from 'react';
+import ApolloClient from "apollo-boost";
+import { gql } from "apollo-boost";
+import { uuid } from  'uuid/v4';
 import './App.css';
+
+const client = new ApolloClient({
+  uri: 'http://localhost:5000/graphql'
+});
 
 function TimerButton(props) {
   if (props.started) {
@@ -56,6 +63,7 @@ function reducer(state, action) {
   if (action.type === 'add') {
     return {
       entries: [...state.entries, {
+        id: uuid(),
         time: state.time,
         text: state.text,
       }],
@@ -93,9 +101,33 @@ function reducer(state, action) {
       ...state,
       text: action.payload,
     };
+  } else if (action.type === 'setEntries') {
+    return {
+      ...state,
+      entries: action.payload
+    };
   }
 
   return state;
+}
+
+function fetchEntries() {
+  return client
+    .query({
+      query: gql`
+        {
+          allEntries {
+            nodes {
+              id,
+              time,
+              text
+            }
+          }
+        }`
+    })
+    .then((response) => {
+      return response.data.allEntries.nodes;
+    });
 }
 
 function App() {
@@ -110,6 +142,16 @@ function App() {
     started: false,
     text: ''
   });
+
+  React.useEffect(() => {
+    fetchEntries()
+      .then((initialEntries) => {
+        dispatch({
+          type: 'setEntries',
+          payload: initialEntries,
+        });
+      });
+  }, []);
 
   React.useEffect(() => {
     if (started) {
