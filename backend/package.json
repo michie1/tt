@@ -1,0 +1,17 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "pg": "^7.11.0",
+    "pg-promise": "^8.7.2",
+    "postgraphile": "^4.4.0",
+    "ts-node": "^8.2.0",
+    "typescript": "^3.5.1"
+  },
+  "scripts": {
+    "startdb": "export $(cat ../.env | xargs) && docker-compose -p tt up -d",
+    "createdb": "bash scripts/create_db.sh"
+  }
+}
