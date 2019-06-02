@@ -13,6 +13,7 @@
   "scripts": {
     "start": "export $(cat ../.env | xargs) && postgraphile -c postgres://postgres:$DB_PASSWORD@$DB_HOST:$DB_PORT/$DB_NAME --watch --cors",
     "startdb": "export $(cat ../.env | xargs) && docker-compose -p tt up -d",
-    "createdb": "bash scripts/create_db.sh"
+    "createdb": "bash scripts/create_db.sh",
+    "migrate": "export $(cat ../.env | xargs) && ts-node"
   }
 }
