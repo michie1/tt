@@ -36,6 +36,9 @@ function Entry(props) {
   return <li>
       <Timer time={props.entry.time} /> - {props.entry.text}
       <button onClick={() => { props.continue(); }}>Continue</button>
+      <span>{props.entry.saved ? 'saved' : 'unsaved'}</span>
+      &nbsp;
+      <span>{props.entry.inDatabase ? 'in Database' : 'not in Database'}</span>
     </li>;
 }
 
@@ -50,7 +53,7 @@ function Entries(props) {
               continue={() => {
                 props.dispatch({
                   type: 'continue',
-                  payload: entry.text,
+                  payload: entry.id,
                 });
               }}
             />;
@@ -60,36 +63,44 @@ function Entries(props) {
 }
 
 function reducer(state, action) {
-  if (action.type === 'add') {
+  if (action.type === 'stop') {
     return {
       entries: [...state.entries, {
-        id: uuid(),
+        id: state.id,
         time: state.time,
         text: state.text,
+        saved: false,
+        inDatabase: state.inDatabase,
       }],
       time: 0,
       started: false,
       text: '',
+      id: null,
+      saved: false,
     };
   } else if (action.type === 'start') {
     return {
       ...state,
       started: true,
+      id: uuid(),
+      inDatase: false,
     };
   } else if (action.type === 'continue') {
     const entry = state.entries
       .find((searchEntry) => {
-        return searchEntry.text === action.payload;
+        return searchEntry.id === action.payload;
       });
 
     return {
       ...state,
       started: true,
       entries: state.entries.filter((entry) => {
-        return entry.text !== action.payload;
+        return entry.id !== action.payload;
       }),
       time: entry.time,
       text: entry.text,
+      id: entry.uuid,
+      inDatabase: entry.inDatabase,
     };
   } else if (action.type === 'tick') {
     return {
@@ -126,7 +137,13 @@ function fetchEntries() {
         }`
     })
     .then((response) => {
-      return response.data.allEntries.nodes;
+      return response.data.allEntries.nodes
+        .map((entry) => {
+          return Object.assign(entry, {
+            saved: true,
+            inDatabase: true,
+          });
+        });
     });
 }
 
@@ -177,7 +194,7 @@ function App() {
       <TimerButton
         started={started}
         start={() => dispatch({ type: 'start' })}
-        stop={() => { dispatch({ type: 'add' })}}
+        stop={() => { dispatch({ type: 'stop' })}}
       />
       <Entries entries={entries} dispatch={dispatch} />
       <br />
