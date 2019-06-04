@@ -5,11 +5,16 @@ services:
     image: postgres
     restart: unless-stopped
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     volumes:
       - db-data:/var/lib/postgresql/data
     environment:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
+
+  postgraphile:
+    build: .
+    ports:
+      - "5000:5000"
 
 volumes:
   db-data:
