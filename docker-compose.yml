@@ -10,11 +10,22 @@ services:
       - db-data:/var/lib/postgresql/data
     environment:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
+    networks:
+      - tt_default
 
   postgraphile:
     build: .
     ports:
       - "127.0.0.1:5000:5000"
+    networks:
+      - vps_default
+      - tt_default
 
 volumes:
   db-data:
+
+networks:
+  vps_default:
+    external: true
+  tt_default:
+    external: false
