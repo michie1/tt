@@ -6,5 +6,5 @@ ssh hetzner tar -xvf ~/tt/build.tar -C ~/tt/frontend/ &&
 ssh hetzner rm ~/tt/build.tar &&
 rm build.tar &&
 rm -r build &&
-ssh hetzner cd ~/tt && git pull origin master &&
+ssh hetzner "cd ~/tt && git pull origin master" &&
 echo 'deployed'
