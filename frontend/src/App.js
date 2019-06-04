@@ -5,7 +5,7 @@ import * as uuid from  'uuid/v4';
 import './App.css';
 
 const client = new ApolloClient({
-  uri: 'http://localhost:5000/graphql'
+  uri: '/graphql'
 });
 
 function TimerButton(props) {
