@@ -161,6 +161,10 @@ function App() {
   });
 
   React.useEffect(() => {
+    document.title = 'Time Tracker';
+  });
+
+  React.useEffect(() => {
     fetchEntries()
       .then((initialEntries) => {
         dispatch({
