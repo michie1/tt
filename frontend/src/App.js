@@ -34,7 +34,7 @@ function prependZero(number) {
 }
 
 function Entry(props) {
-  return <tr class="table">
+  return <tr>
         <td>
           {props.entry.text}
         </td>
@@ -51,7 +51,7 @@ function Entry(props) {
 function Entries(props) {
   return <div>
     <h3 class="title is-3">Entries</h3>
-    <table class="table">
+    <table class="table is-fullwidth">
     {props.entries.map((entry) => {
       return <Entry
       key={entry.id}
