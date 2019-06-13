@@ -3,7 +3,10 @@ import ApolloClient from "apollo-boost";
 import { gql } from "apollo-boost";
 import * as uuid from  'uuid/v4';
 import './App.css';
-import 'bulma/css/bulma.css'
+import 'bulma/css/bulma.css';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faPlay } from '@fortawesome/free-solid-svg-icons'
+
 
 const client = new ApolloClient({
   uri: '/graphql/'
@@ -48,7 +51,9 @@ function Entry(props) {
         </td>
         <td style={tdStyle}>
           <Timer time={props.entry.time} />
-          <button className="button" onClick={() => { props.continue(); }} disabled={props.started}>Continue</button>
+          <button className="button" onClick={() => { props.continue(); }} disabled={props.started}>
+            <FontAwesomeIcon icon={faPlay} />
+          </button>
           <button className="delete is-large" onClick={() => { props.delete(); }}>Delete</button>
         </td>
       </tr>;
