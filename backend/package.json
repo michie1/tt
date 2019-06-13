@@ -11,8 +11,7 @@
     "typescript": "^3.5.1"
   },
   "scripts": {
-    "hoi": "echo 'doei'",
-    "start": "export $(cat ../.env | xargs) && postgraphile -c postgres://$DB_USER:$DB_PASSWORD@$DB_HOST:$DB_PORT/$DB_NAME --watch --cors --host 0.0.0.0",
+    "start": "ts-node main.ts",
     "migrate": "export $(cat ../.env | xargs) && ts-node"
   }
 }
