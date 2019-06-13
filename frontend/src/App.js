@@ -11,9 +11,9 @@ const client = new ApolloClient({
 
 function TimerButton(props) {
   if (props.started) {
-    return <button class="button is-danger" type="button" onClick={() => props.stop()}>Stop</button>
+    return <button className="button is-danger" type="button" onClick={() => props.stop()}>Stop</button>
   } else {
-    return <button class="button is-primary" type="button" onClick={() => props.start()}>Start</button>
+    return <button className="button is-primary" type="button" onClick={() => props.start()}>Start</button>
   }
 }
 
@@ -33,47 +33,55 @@ function prependZero(number) {
   }
 }
 
+const trStyle = {
+  lineHeight: '2em',
+};
+
+const tdStyle = {
+  width: '13em',
+};
+
 function Entry(props) {
-  return <tr>
+  return <tr style={trStyle}>
         <td>
           {props.entry.text}
         </td>
-        <td>
+        <td style={tdStyle}>
           <Timer time={props.entry.time} />
-        </td>
-        <td>
-          <button class="button" onClick={() => { props.continue(); }} disabled={props.started}>Continue</button>
-          <button class="delete is-large" onClick={() => { props.delete(); }}>Delete</button>
+          <button className="button" onClick={() => { props.continue(); }} disabled={props.started}>Continue</button>
+          <button className="delete is-large" onClick={() => { props.delete(); }}>Delete</button>
         </td>
       </tr>;
 }
 
 function Entries(props) {
   return <div>
-    <h3 class="title is-3">Entries</h3>
-    <table class="table is-fullwidth">
-    {props.entries.map((entry) => {
-      return <Entry
-      key={entry.id}
-      entry={entry}
-      started={props.started}
-      continue={() => {
-        props.dispatch({
-          type: 'continue',
-          payload: entry.id,
-        });
-      }}
-              delete={() => {
-                deleteEntry(entry.id)
-                  .then(() => {
-                    props.dispatch({
-                      type: 'delete',
-                      payload: entry.id,
-                    });
-                  });
-              }}
-            />;
-        })}
+    <h3 className="title is-3">Entries</h3>
+    <table className="table is-fullwidth">
+      <tbody>
+        {props.entries.map((entry) => {
+          return <Entry
+          key={entry.id}
+          entry={entry}
+          started={props.started}
+          continue={() => {
+            props.dispatch({
+              type: 'continue',
+              payload: entry.id,
+            });
+          }}
+                  delete={() => {
+                    deleteEntry(entry.id)
+                      .then(() => {
+                        props.dispatch({
+                          type: 'delete',
+                          payload: entry.id,
+                        });
+                      });
+                  }}
+                />;
+            })}
+        </tbody>
       </table>
     </div>;
 }
@@ -330,15 +338,15 @@ function App() {
 
   return (
     <div>
-      <h1 class="title level-item has-text-centered">Time Tracker</h1>
-      <div class="container">
-        <h2 class="title is-2 level-item has-text-centered"><Timer time={time} /></h2>
-        <div class="field is-horizontal">
-          <div class="control">
-            <input class="input is-primary" name="timer_text" value={text} placeholder="entry" onChange={(e) => dispatch({ type: 'setText', payload: e.target.value })} />
+      <h1 className="title level-item has-text-centered">Time Tracker</h1>
+      <div className="container">
+        <h2 className="title is-2 level-item has-text-centered"><Timer time={time} /></h2>
+        <div className="field is-horizontal">
+          <div className="control">
+            <input className="input is-primary" name="timer_text" value={text} placeholder="entry" onChange={(e) => dispatch({ type: 'setText', payload: e.target.value })} />
           </div>
-          <div class="control">
-            <span class="level-item has-text-centered">
+          <div className="control">
+            <span className="level-item has-text-centered">
               <TimerButton
                 started={started}
                 start={() => dispatch({ type: 'start' })}

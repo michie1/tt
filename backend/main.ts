@@ -3,6 +3,10 @@ import { postgraphile } from 'postgraphile';
 import * as cors from 'cors';
 import * as dotenv from 'dotenv';
 
+dotenv.config({
+  path: '../.env'
+});
+
 const app = express();
 app.use(cors());
 
