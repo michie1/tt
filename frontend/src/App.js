@@ -64,28 +64,33 @@ function Entries(props) {
     <h3 className="title is-3">Entries</h3>
     <table className="table is-fullwidth">
       <tbody>
-        {props.entries.map((entry) => {
-          return <Entry
-          key={entry.id}
-          entry={entry}
-          started={props.started}
-          continue={() => {
-            props.dispatch({
-              type: 'continue',
-              payload: entry.id,
-            });
-          }}
-                  delete={() => {
-                    deleteEntry(entry.id)
-                      .then(() => {
-                        props.dispatch({
-                          type: 'delete',
-                          payload: entry.id,
-                        });
+        {props.entries
+          .sort((a, b) => {
+            return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+          })
+          .map((entry) => {
+              return <Entry
+                key={entry.id}
+                entry={entry}
+                started={props.started}
+                continue={() => {
+                  props.dispatch({
+                    type: 'continue',
+                    payload: entry.id,
+                  });
+                }}
+                delete={() => {
+                  deleteEntry(entry.id)
+                    .then(() => {
+                      props.dispatch({
+                        type: 'delete',
+                        payload: entry.id,
                       });
-                  }}
-                />;
-            })}
+                    });
+                }}
+              />;
+          })
+        }
         </tbody>
       </table>
     </div>;
@@ -98,6 +103,7 @@ function reducer(state, action) {
         id: state.entryId,
         time: state.time,
         text: state.text,
+        createdAt: state.createdAt,
         saved: false,
         inDatabase: state.inDatabase || false,
       }],
@@ -113,6 +119,7 @@ function reducer(state, action) {
       started: true,
       entryId: uuid(),
       inDatase: false,
+      createdAt: new Date().toISOString(),
     };
   } else if (action.type === 'continue') {
     const entry = state.entries
@@ -128,6 +135,7 @@ function reducer(state, action) {
       }),
       time: entry.time,
       text: entry.text,
+      createdAt: entry.createdAt,
       entryId: entry.id,
       inDatabase: entry.inDatabase,
     };
@@ -180,7 +188,8 @@ function fetchEntries() {
             nodes {
               id,
               time,
-              text
+              text,
+              createdAt
             }
           }
         }`
@@ -206,7 +215,8 @@ function createEntry(entry) {
               entry:{
                 id: "${entry.id}",
                 text: "${entry.text}",
-                time: ${entry.time}
+                time: ${entry.time},
+                createdAt: "${entry.createdAt}"
               }
             }
           ) {
@@ -266,6 +276,7 @@ function App() {
     started: false,
     text: '',
     entryId: null,
+    createdAt: null,
   });
 
   React.useEffect(() => {
