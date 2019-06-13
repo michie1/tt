@@ -34,24 +34,24 @@ function prependZero(number) {
 }
 
 function Entry(props) {
-  return <div class="columns">
-        <div class="column">
+  return <tr class="table">
+        <td>
           {props.entry.text}
-        </div>
-        <div class="column">
+        </td>
+        <td>
           <Timer time={props.entry.time} />
-        </div>
-        <div class="column">
+        </td>
+        <td>
           <button class="button" onClick={() => { props.continue(); }} disabled={props.started}>Continue</button>
           <button class="delete is-large" onClick={() => { props.delete(); }}>Delete</button>
-        </div>
-      </div>;
+        </td>
+      </tr>;
 }
 
 function Entries(props) {
   return <div>
     <h3 class="title is-3">Entries</h3>
-    <div>
+    <table class="table">
     {props.entries.map((entry) => {
       return <Entry
       key={entry.id}
@@ -74,7 +74,7 @@ function Entries(props) {
               }}
             />;
         })}
-      </div>
+      </table>
     </div>;
 }
 
@@ -330,19 +330,21 @@ function App() {
 
   return (
     <div>
-      <h1 class="title">Time Tracker</h1>
+      <h1 class="title level-item has-text-centered">Time Tracker</h1>
       <div class="container">
-        <h2 class="title is-2"><Timer time={time} /></h2>
+        <h2 class="title is-2 level-item has-text-centered"><Timer time={time} /></h2>
         <div class="field is-horizontal">
           <div class="control">
             <input class="input is-primary" name="timer_text" value={text} placeholder="entry" onChange={(e) => dispatch({ type: 'setText', payload: e.target.value })} />
           </div>
           <div class="control">
-            <TimerButton
-              started={started}
-              start={() => dispatch({ type: 'start' })}
-              stop={() => { dispatch({ type: 'stop' })}}
-            />
+            <span class="level-item has-text-centered">
+              <TimerButton
+                started={started}
+                start={() => dispatch({ type: 'start' })}
+                stop={() => { dispatch({ type: 'stop' })}}
+              />
+            </span>
           </div>
         </div>
         <Entries entries={entries} dispatch={dispatch} started={started} />
