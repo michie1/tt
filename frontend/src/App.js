@@ -35,10 +35,8 @@ function prependZero(number) {
 function Entry(props) {
   return <li>
       <Timer time={props.entry.time} /> - {props.entry.text}
-      <button onClick={() => { props.continue(); }}>Continue</button>
-      <span>{props.entry.saved ? 'saved' : 'unsaved'}</span>
-      &nbsp;
-      <span>{props.entry.inDatabase ? 'in Database' : 'not in Database'}</span>
+      <button onClick={() => { props.continue(); }} disabled={props.started}>Continue</button>
+      <button onClick={() => { props.delete(); }}>Delete</button>
     </li>;
 }
 
@@ -48,13 +46,23 @@ function Entries(props) {
       <ul>
         {props.entries.map((entry) => {
           return <Entry
-              key={entry.text}
+              key={entry.id}
               entry={entry}
+              started={props.started}
               continue={() => {
                 props.dispatch({
                   type: 'continue',
                   payload: entry.id,
                 });
+              }}
+              delete={() => {
+                deleteEntry(entry.id)
+                  .then(() => {
+                    props.dispatch({
+                      type: 'delete',
+                      payload: entry.id,
+                    });
+                  });
               }}
             />;
         })}
@@ -66,23 +74,23 @@ function reducer(state, action) {
   if (action.type === 'stop') {
     return {
       entries: [...state.entries, {
-        id: state.id,
+        id: state.entryId,
         time: state.time,
         text: state.text,
         saved: false,
-        inDatabase: state.inDatabase,
+        inDatabase: state.inDatabase || false,
       }],
       time: 0,
       started: false,
       text: '',
-      id: null,
+      entryId: null,
       saved: false,
     };
   } else if (action.type === 'start') {
     return {
       ...state,
       started: true,
-      id: uuid(),
+      entryId: uuid(),
       inDatase: false,
     };
   } else if (action.type === 'continue') {
@@ -99,7 +107,7 @@ function reducer(state, action) {
       }),
       time: entry.time,
       text: entry.text,
-      id: entry.uuid,
+      entryId: entry.id,
       inDatabase: entry.inDatabase,
     };
   } else if (action.type === 'tick') {
@@ -116,6 +124,26 @@ function reducer(state, action) {
     return {
       ...state,
       entries: action.payload
+    };
+  } else if (action.type === 'saved') {
+    return {
+      ...state,
+      entries: state.entries
+        .map((entry) => {
+          if (action.payload.includes(entry.id)) {
+            entry.saved = true;
+            entry.inDatabase = true;
+          }
+          return entry;
+        }),
+    }
+  } else if (action.type === 'delete') {
+    return {
+      ...state,
+      entries: state.entries
+        .filter((entry) => {
+          return entry.id !== action.payload;
+        })
     };
   }
 
@@ -147,6 +175,64 @@ function fetchEntries() {
     });
 }
 
+function createEntry(entry) {
+  return client
+    .mutate({
+      mutation: gql`
+        mutation {
+          createEntry(
+            input:{
+              entry:{
+                id: "${entry.id}",
+                text: "${entry.text}",
+                time: ${entry.time}
+              }
+            }
+          ) {
+            entry {
+              id
+            }
+          }
+        }`
+    });
+}
+
+function updateEntry(entry) {
+  return client
+    .mutate({
+      mutation: gql`
+        mutation {
+          updateEntryById(
+            input: {
+              id: "${entry.id}",
+              entryPatch: {
+                text: "${entry.text}"
+                time: ${entry.time}
+              }
+            }
+          ) {
+            entry {
+              id
+            }
+          }
+        }`
+    });
+}
+
+function deleteEntry(entryId) {
+  return client
+    .mutate({
+      mutation: gql`
+        mutation {
+          deleteEntryById(input: {
+              id: "${entryId}"
+          }) {
+            deletedEntryId
+          }
+        }`
+    });
+}
+
 function App() {
   const [{
     entries,
@@ -157,7 +243,8 @@ function App() {
     entries: [],
     time: 0,
     started: false,
-    text: ''
+    text: '',
+    entryId: null,
   });
 
   React.useEffect(() => {
@@ -187,6 +274,48 @@ function App() {
     }
   }, [started]);
 
+  React.useEffect(() => {
+    if (started === false) {
+      const createEntries = entries
+        .filter((entry) => {
+          return entry.inDatabase === false;
+        });
+
+      const updateEntries = entries
+        .filter((entry) => {
+          return entry.inDatabase &&
+            entry.saved === false;
+        });
+
+      Promise.all([...(createEntries
+          .map((entry) => {
+            return createEntry(entry);
+          })
+        ),
+        ...(updateEntries
+          .map((entry) => {
+            return updateEntry(entry);
+          })
+        )
+      ])
+        .then((responses) => {
+          return responses.map((response) => {
+            return response.data.updateEntryById ?
+              response.data.updateEntryById.entry.id :
+              response.data.createEntry.entry.id;
+          })
+        })
+        .then((ids) => {
+          if (ids.length > 0) {
+            dispatch({
+              type: 'saved',
+              payload: ids
+            });
+          }
+        });
+    }
+  }, [started, entries]);
+
   const sum = entries.reduce((soFar, entry) => {
     return soFar + entry.time;
   }, time);
@@ -194,13 +323,13 @@ function App() {
   return (
     <div>
       <h2><Timer time={time} /></h2>
-      <input name="timer_text" value={text} placeholder="task" onChange={(e) => dispatch({ type: 'setText', payload: e.target.value })} />
+      <input name="timer_text" value={text} placeholder="entry" onChange={(e) => dispatch({ type: 'setText', payload: e.target.value })} />
       <TimerButton
         started={started}
         start={() => dispatch({ type: 'start' })}
         stop={() => { dispatch({ type: 'stop' })}}
       />
-      <Entries entries={entries} dispatch={dispatch} />
+      <Entries entries={entries} dispatch={dispatch} started={started} />
       <br />
       Total time: <Timer time={sum} />
     </div>
