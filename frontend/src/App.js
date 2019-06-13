@@ -3,6 +3,7 @@ import ApolloClient from "apollo-boost";
 import { gql } from "apollo-boost";
 import * as uuid from  'uuid/v4';
 import './App.css';
+import 'bulma/css/bulma.css'
 
 const client = new ApolloClient({
   uri: '/graphql/'
@@ -10,9 +11,9 @@ const client = new ApolloClient({
 
 function TimerButton(props) {
   if (props.started) {
-    return <button type="button" onClick={() => props.stop()}>Stop</button>
+    return <button class="button is-danger" type="button" onClick={() => props.stop()}>Stop</button>
   } else {
-    return <button type="button" onClick={() => props.start()}>Start</button>
+    return <button class="button is-primary" type="button" onClick={() => props.start()}>Start</button>
   }
 }
 
@@ -33,28 +34,35 @@ function prependZero(number) {
 }
 
 function Entry(props) {
-  return <li>
-      <Timer time={props.entry.time} /> - {props.entry.text}
-      <button onClick={() => { props.continue(); }} disabled={props.started}>Continue</button>
-      <button onClick={() => { props.delete(); }}>Delete</button>
-    </li>;
+  return <div class="columns">
+        <div class="column">
+          {props.entry.text}
+        </div>
+        <div class="column">
+          <Timer time={props.entry.time} />
+        </div>
+        <div class="column">
+          <button class="button" onClick={() => { props.continue(); }} disabled={props.started}>Continue</button>
+          <button class="delete is-large" onClick={() => { props.delete(); }}>Delete</button>
+        </div>
+      </div>;
 }
 
 function Entries(props) {
   return <div>
-      <h2>Entries</h2>
-      <ul>
-        {props.entries.map((entry) => {
-          return <Entry
-              key={entry.id}
-              entry={entry}
-              started={props.started}
-              continue={() => {
-                props.dispatch({
-                  type: 'continue',
-                  payload: entry.id,
-                });
-              }}
+    <h3 class="title is-3">Entries</h3>
+    <div>
+    {props.entries.map((entry) => {
+      return <Entry
+      key={entry.id}
+      entry={entry}
+      started={props.started}
+      continue={() => {
+        props.dispatch({
+          type: 'continue',
+          payload: entry.id,
+        });
+      }}
               delete={() => {
                 deleteEntry(entry.id)
                   .then(() => {
@@ -66,7 +74,7 @@ function Entries(props) {
               }}
             />;
         })}
-      </ul>
+      </div>
     </div>;
 }
 
@@ -322,16 +330,25 @@ function App() {
 
   return (
     <div>
-      <h2><Timer time={time} /></h2>
-      <input name="timer_text" value={text} placeholder="entry" onChange={(e) => dispatch({ type: 'setText', payload: e.target.value })} />
-      <TimerButton
-        started={started}
-        start={() => dispatch({ type: 'start' })}
-        stop={() => { dispatch({ type: 'stop' })}}
-      />
-      <Entries entries={entries} dispatch={dispatch} started={started} />
-      <br />
-      Total time: <Timer time={sum} />
+      <h1 class="title">Time Tracker</h1>
+      <div class="container">
+        <h2 class="title is-2"><Timer time={time} /></h2>
+        <div class="field is-horizontal">
+          <div class="control">
+            <input class="input is-primary" name="timer_text" value={text} placeholder="entry" onChange={(e) => dispatch({ type: 'setText', payload: e.target.value })} />
+          </div>
+          <div class="control">
+            <TimerButton
+              started={started}
+              start={() => dispatch({ type: 'start' })}
+              stop={() => { dispatch({ type: 'stop' })}}
+            />
+          </div>
+        </div>
+        <Entries entries={entries} dispatch={dispatch} started={started} />
+        <br />
+        Total time: <strong><Timer time={sum} /></strong>
+      </div>
     </div>
   );
 }
