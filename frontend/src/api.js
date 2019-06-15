@@ -2,7 +2,7 @@ import ApolloClient from 'apollo-boost';
 import { gql } from 'apollo-boost';
 
 const client = new ApolloClient({
-  uri: process.env.REACT_APP_API + '/graphql'
+  uri: process.env.REACT_APP_API + '/graphql/'
 });
 
 function fetchEntries() {
