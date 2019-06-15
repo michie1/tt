@@ -1,8 +1,17 @@
 import ApolloClient from 'apollo-boost';
 import { gql } from 'apollo-boost';
 
+const uri = (() => {
+  const base = process.env.REACT_APP_API + '/graphql'
+  if (process.env.NODE_ENV === 'development') {
+    return base
+  } else {
+    return base + '/'; // express needs ending slash
+  }
+})();
+
 const client = new ApolloClient({
-  uri: process.env.REACT_APP_API + '/graphql/'
+  uri
 });
 
 function fetchEntries() {
