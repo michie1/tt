@@ -17,8 +17,8 @@
     "uuid": "^3.3.2"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
+    "start": "export $(cat ../.env | xargs) && react-scripts start",
+    "build": "export $(cat ../.env | xargs) && react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },

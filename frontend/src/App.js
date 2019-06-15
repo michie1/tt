@@ -7,9 +7,8 @@ import 'bulma/css/bulma.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPlay } from '@fortawesome/free-solid-svg-icons'
 
-
 const client = new ApolloClient({
-  uri: '/graphql/'
+  uri: process.env.REACT_APP_API + '/graphql'
 });
 
 function TimerButton(props) {
