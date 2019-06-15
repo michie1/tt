@@ -14,6 +14,7 @@ const connection = `postgres://${process.env.DB_USER}:${process.env.DB_PASSWORD}
 
 app.use(postgraphile(connection, 'public', {
   graphiql: true,
+  enableCors: true,
 }));
 
 app.listen(5000);
